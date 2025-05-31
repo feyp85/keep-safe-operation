@@ -7,7 +7,9 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("titanium-campus-427001-t9-425ae063ec83.json", scope)
+import json
+creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 sheet = client.open("KeepSafe_DB")
 clientes_ws = sheet.worksheet("Clientes")

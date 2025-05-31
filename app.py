@@ -66,7 +66,7 @@ if cultivo and hectareas:
     vuelos = total_sol / 40
     tiempo = vuelos * 10 / 60
 
-     st.markdown("---")
+    st.markdown("---")
     st.subheader("📋 Recomendaciones Técnicas")
     velocidad = st.text_input(f"🔹 Velocidad (rango sugerido: {datos['velocidad']})")
     altura = st.text_input(f"🔹 Altura (rango sugerido: {datos['altura']})")

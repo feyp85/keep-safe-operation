@@ -66,13 +66,13 @@ if cultivo and hectareas:
     vuelos = total_sol / 40
     tiempo = vuelos * 10 / 60
 
-    st.markdown("---")
+     st.markdown("---")
     st.subheader("📋 Recomendaciones Técnicas")
-    st.write(f"🔹 Velocidad: {datos['velocidad']}")
-    st.write(f"🔹 Altura: {datos['altura']}")
-    st.write(f"🔹 Faja: {datos['ancho_faja']}")
-    st.write(f"🔹 Gota: {datos['gota']}")
-    st.write(f"🔹 Tasa: {tasa} L/ha")
+    velocidad = st.text_input(f"🔹 Velocidad (rango sugerido: {datos['velocidad']})")
+    altura = st.text_input(f"🔹 Altura (rango sugerido: {datos['altura']})")
+    faja = st.text_input(f"🔹 Ancho de faja (rango sugerido: {datos['ancho_faja']})")
+    gota = st.text_input(f"🔹 Tamaño de gota (sugerido: {datos['gota']})")
+    tasa_aplicacion = st.text_input(f"🔹 Tasa de aplicación (sugerida: {tasa} L/ha)", value=str(tasa))
 
     st.subheader("🛠️ Cálculos Operativos")
     st.write(f"✅ Solución total: {total_sol:.2f} L")
@@ -83,7 +83,8 @@ if cultivo and hectareas:
     if st.button("💾 Guardar Operación"):
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         operaciones_ws.append_row([
-            len(operaciones_ws.get_all_values()), ruc_input, cultivo, hectareas, dilucion,
-            total_sol, puro, int(vuelos), round(tiempo, 2), now
+            len(operaciones_ws.get_all_values()), ruc_codigo, cultivo, hectareas, dilucion,
+            total_sol, puro, int(vuelos), round(tiempo, 2), velocidad, altura, faja, gota, tasa_aplicacion, now
         ])
         st.success("Operación guardada")
+

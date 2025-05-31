@@ -5,9 +5,9 @@ from PIL import Image
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
+import json
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-import json
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
@@ -29,9 +29,13 @@ cultivos_data = {
 }
 
 st.sidebar.subheader("📇 Gestión de Clientes")
-ruc_input = st.sidebar.text_input("🔍 Buscar cliente por RUC")
 clientes_data = clientes_ws.get_all_records()
-cliente_encontrado = next((c for c in clientes_data if c["RUC"] == ruc_input), None)
+lista_rucs = [c["RUC"] for c in clientes_data]
+cliente_nombres = [f"{c['RUC']} - {c['Nombre']}" for c in clientes_data]
+
+ruc_input = st.sidebar.selectbox("🔍 Buscar cliente por RUC", options=cliente_nombres)
+ruc_codigo = ruc_input.split(" - ")[0] if " - " in ruc_input else ruc_input
+cliente_encontrado = next((c for c in clientes_data if c["RUC"] == ruc_codigo), None)
 
 if cliente_encontrado:
     st.sidebar.success(f"Cliente: {cliente_encontrado['Nombre']}")
@@ -39,6 +43,7 @@ else:
     st.sidebar.warning("Cliente no encontrado")
 
 with st.sidebar.expander("➕ Crear nuevo cliente"):
+    nuevo_ruc = st.text_input("RUC")
     nombre = st.text_input("Nombre")
     telefono = st.text_input("Teléfono")
     email = st.text_input("Email")
@@ -46,7 +51,7 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     responsable = st.text_input("Responsable Técnico")
     if st.button("Guardar Cliente"):
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        clientes_ws.append_row([len(clientes_data)+1, ruc_input, nombre, telefono, email, ubicacion, responsable, fecha])
+        clientes_ws.append_row([len(clientes_data)+1, nuevo_ruc, nombre, telefono, email, ubicacion, responsable, fecha])
         st.success("Cliente guardado")
 
 cultivo = st.selectbox("🌿 Cultivo", list(cultivos_data.keys()))

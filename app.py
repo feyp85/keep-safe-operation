@@ -34,8 +34,13 @@ lista_rucs = [c["RUC"] for c in clientes_data]
 cliente_nombres = [f"{c['RUC']} - {c['Nombre']}" for c in clientes_data]
 
 ruc_input = st.sidebar.selectbox("🔍 Buscar cliente por RUC", options=cliente_nombres)
-ruc_codigo = ruc_input.split(" - ")[0] if " - " in ruc_input else ruc_input
-cliente_encontrado = next((c for c in clientes_data if c["RUC"] == ruc_codigo), None)
+
+if ruc_input:
+    ruc_codigo = ruc_input.split(" - ")[0]
+    cliente_encontrado = next((c for c in clientes_data if c["RUC"] == ruc_codigo), None)
+else:
+    ruc_codigo = ""
+    cliente_encontrado = None
 
 if cliente_encontrado:
     st.sidebar.success(f"Cliente: {cliente_encontrado['Nombre']}")

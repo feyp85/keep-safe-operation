@@ -54,7 +54,37 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     email = st.text_input("Email")
     ubicacion = st.text_input("Ubicación")
     responsable = st.text_input("Responsable Técnico")
-    if st.button("Guardar Cliente"):
+    st.markdown("📍 Selecciona la ubicación en el mapa")
+    import pydeck as pdk
+    default_location = {"lat": -2.1894, "lon": -79.8891}
+    selected_location = st.session_state.get("selected_location", default_location)
+
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/streets-v12",
+        initial_view_state=pdk.ViewState(
+            latitude=selected_location["lat"],
+            longitude=selected_location["lon"],
+            zoom=12,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=[selected_location],
+                get_position='[lon, lat]',
+                get_color='[200, 30, 0, 160]',
+                get_radius=100,
+            )
+        ],
+    ))
+
+    lat = st.number_input("Latitud", value=selected_location["lat"], format="%.6f")
+    lon = st.number_input("Longitud", value=selected_location["lon"], format="%.6f")
+    
+  if st.button("Guardar Cliente"):
+    if nuevo_ruc in lista_rucs:
+        st.error("❌ Este RUC ya está registrado.")
+    else:
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         clientes_ws.append_row([len(clientes_data)+1, nuevo_ruc, nombre, telefono, email, ubicacion, responsable, fecha])
         st.success("Cliente guardado")
@@ -72,7 +102,7 @@ if cultivo and hectareas:
     tiempo = vuelos * 10 / 60
 
     st.markdown("---")
-    st.subheader("📋 Recomendaciones Técnicas")
+    st.subheader("📋 Recomendaciones Técnicas - para el operador")
     velocidad = st.text_input(f"🔹 Velocidad (rango sugerido: {datos['velocidad']})")
     altura = st.text_input(f"🔹 Altura (rango sugerido: {datos['altura']})")
     faja = st.text_input(f"🔹 Ancho de faja (rango sugerido: {datos['ancho_faja']})")

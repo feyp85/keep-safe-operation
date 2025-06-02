@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from PIL import Image
@@ -8,7 +9,7 @@ import json
 import folium
 from streamlit_folium import st_folium
 
-# Autenticación con Google Sheets
+# Google Sheets auth
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
@@ -24,7 +25,7 @@ st.image(logo, width=180)
 st.title("Keep Safe Operation")
 st.markdown("### Hoja de Recomendaciones Operativas para Fumigación con Dron DJI Agras T50")
 
-# Parámetros por cultivo
+# Cultivos data
 cultivos_data = {
     "Banano": {"tasa_aplicacion": 18, "velocidad": "20-30 km/h", "altura": "7-8 m", "ancho_faja": "7-9.5 m", "gota": "Fina/Media"},
     "Maíz": {"tasa_aplicacion": 19, "velocidad": "20-25 km/h", "altura": "5-6 m", "ancho_faja": "7-8.5 m", "gota": "Fina/Media/Gruesa"},
@@ -36,10 +37,10 @@ cultivos_data = {
 st.sidebar.subheader("📇 Gestión de Clientes")
 try:
     clientes_data = clientes_ws.get_all_records()
-except gspread.exceptions.APIError as e:
-    st.error("⚠️ No se pudo acceder a la hoja de clientes. Verifica conexión, permisos o vuelve a intentar en unos minutos.")
+except gspread.exceptions.APIError:
+    st.error("❌ No se pudo acceder a la hoja de clientes. Verifica permisos o conexión.")
     st.stop()
-lista_rucs = [c["RUC"] for c in clientes_data]
+
 cliente_nombres = [f"{c['RUC']} - {c['Nombre']}" for c in clientes_data]
 ruc_input = st.sidebar.selectbox("🔍 Buscar cliente por RUC", options=cliente_nombres)
 
@@ -55,6 +56,7 @@ if cliente_encontrado:
 else:
     st.sidebar.warning("Cliente no encontrado")
 
+# Crear nuevo cliente
 with st.sidebar.expander("➕ Crear nuevo cliente"):
     nuevo_ruc = st.text_input("RUC")
     nombre = st.text_input("Nombre")
@@ -63,24 +65,24 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     ubicacion = st.text_input("Ubicación")
     responsable = st.text_input("Responsable Técnico")
 
-    st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
-
+    st.markdown("📍 Haz clic en el mapa para seleccionar la ubicación del cliente")
     m = folium.Map(location=[-2.1894, -79.8891], zoom_start=13)
-    folium.Marker(location=[-2.1894, -79.8891], tooltip="Ubicación referencial").add_to(m)
-    output = st_folium(m, width=300, height=300)
-
-    lat = st.number_input("Latitud", value=-2.1894, format="%.6f")
-    lon = st.number_input("Longitud", value=-79.8891, format="%.6f")
+    m.add_child(folium.LatLngPopup())
+    map_data = st_folium(m, height=350, width=700)
+    lat = map_data["last_clicked"]["lat"] if map_data and map_data["last_clicked"] else -2.1894
+    lon = map_data["last_clicked"]["lng"] if map_data and map_data["last_clicked"] else -79.8891
+    st.write(f"📌 Latitud seleccionada: {lat:.6f}")
+    st.write(f"📌 Longitud seleccionada: {lon:.6f}")
 
     if st.button("Guardar Cliente"):
-        if nuevo_ruc in lista_rucs:
+        if nuevo_ruc in [c["RUC"] for c in clientes_data]:
             st.error("❌ Este RUC ya está registrado.")
         else:
             fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             clientes_ws.append_row([len(clientes_data)+1, nuevo_ruc, nombre, telefono, email, ubicacion, responsable, lat, lon, fecha])
-            st.success("Cliente guardado")
+            st.success("✅ Cliente guardado")
 
-# Operación
+# Recomendaciones
 cultivo = st.selectbox("🌿 Cultivo", list(cultivos_data.keys()))
 hectareas = st.number_input("📐 Hectáreas", min_value=0.1, step=0.1)
 dilucion = st.number_input("🧪 Dilución (%)", min_value=0.0, step=0.1)
@@ -113,4 +115,4 @@ if cultivo and hectareas:
             len(operaciones_ws.get_all_values()), ruc_codigo, cultivo, hectareas, dilucion,
             total_sol, puro, int(vuelos), round(tiempo, 2), velocidad, altura, faja, gota, tasa_aplicacion, now
         ])
-        st.success("Operación guardada")
+        st.success("✅ Operación guardada")

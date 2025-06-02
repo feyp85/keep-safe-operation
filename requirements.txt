@@ -1,7 +1,7 @@
 streamlit
-pandas
-Pillow
 gspread
 oauth2client
-pydeck
+pandas
+Pillow
+folium
 streamlit-folium

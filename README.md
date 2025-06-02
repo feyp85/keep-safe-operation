@@ -1,3 +1,3 @@
-# Keep Safe Operation
+# Keep Safe Operation App
 
-App para recomendaciones técnicas y gestión de operaciones con dron DJI Agras T50.
+App de recomendación técnica para fumigación con dron DJI Agras T50.

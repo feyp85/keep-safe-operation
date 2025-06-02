@@ -5,9 +5,10 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
-from streamlit_folium import st_folium
 import folium
+from streamlit_folium import st_folium
 
+# Autenticación con Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
@@ -16,12 +17,14 @@ sheet = client.open("KeepSafe_DB")
 clientes_ws = sheet.worksheet("Clientes")
 operaciones_ws = sheet.worksheet("Operaciones")
 
+# Logo
 logo = Image.open("logo1.0.png")
 st.image(logo, width=180)
 
 st.title("Keep Safe Operation")
 st.markdown("### Hoja de Recomendaciones Operativas para Fumigación con Dron DJI Agras T50")
 
+# Parámetros por cultivo
 cultivos_data = {
     "Banano": {"tasa_aplicacion": 18, "velocidad": "20-30 km/h", "altura": "7-8 m", "ancho_faja": "7-9.5 m", "gota": "Fina/Media"},
     "Maíz": {"tasa_aplicacion": 19, "velocidad": "20-25 km/h", "altura": "5-6 m", "ancho_faja": "7-8.5 m", "gota": "Fina/Media/Gruesa"},
@@ -29,11 +32,11 @@ cultivos_data = {
     "Cacao": {"tasa_aplicacion": 25, "velocidad": "20-25 km/h", "altura": "7 m", "ancho_faja": "7-8.5 m", "gota": "Muy Fina/Fina/Media"},
 }
 
+# Clientes
 st.sidebar.subheader("📇 Gestión de Clientes")
 clientes_data = clientes_ws.get_all_records()
 lista_rucs = [c["RUC"] for c in clientes_data]
 cliente_nombres = [f"{c['RUC']} - {c['Nombre']}" for c in clientes_data]
-
 ruc_input = st.sidebar.selectbox("🔍 Buscar cliente por RUC", options=cliente_nombres)
 
 if ruc_input:
@@ -56,38 +59,14 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     ubicacion = st.text_input("Ubicación")
     responsable = st.text_input("Responsable Técnico")
 
-            st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
+    st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
 
-        m = folium.Map(location=[-2.1894, -79.8891], zoom_start=13)
-        marker = folium.Marker(location=[-2.1894, -79.8891], draggable=True)
-        marker.add_to(m)
-        output = st_folium(m, height=300, width=600)
+    m = folium.Map(location=[-2.1894, -79.8891], zoom_start=13)
+    folium.Marker(location=[-2.1894, -79.8891], tooltip="Ubicación referencial").add_to(m)
+    output = st_folium(m, width=300, height=300)
 
-        lat = output['last_clicked']['lat'] if output and output.get('last_clicked') else -2.1894
-        lon = output['last_clicked']['lng'] if output and output.get('last_clicked') else -79.8891
-    selected_location = st.session_state.get("selected_location", default_location)
-
-    st.pydeck_chart(pdk.Deck(
-        map_style="mapbox://styles/mapbox/streets-v12",
-        initial_view_state=pdk.ViewState(
-            latitude=selected_location["lat"],
-            longitude=selected_location["lon"],
-            zoom=12,
-            pitch=0,
-        ),
-        layers=[
-            pdk.Layer(
-                "ScatterplotLayer",
-                data=[selected_location],
-                get_position='[lon, lat]',
-                get_color='[200, 30, 0, 160]',
-                get_radius=100,
-            )
-        ],
-    ))
-
-    lat = st.number_input("Latitud", value=selected_location["lat"], format="%.6f")
-    lon = st.number_input("Longitud", value=selected_location["lon"], format="%.6f")
+    lat = st.number_input("Latitud", value=-2.1894, format="%.6f")
+    lon = st.number_input("Longitud", value=-79.8891, format="%.6f")
 
     if st.button("Guardar Cliente"):
         if nuevo_ruc in lista_rucs:
@@ -97,6 +76,7 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
             clientes_ws.append_row([len(clientes_data)+1, nuevo_ruc, nombre, telefono, email, ubicacion, responsable, lat, lon, fecha])
             st.success("Cliente guardado")
 
+# Operación
 cultivo = st.selectbox("🌿 Cultivo", list(cultivos_data.keys()))
 hectareas = st.number_input("📐 Hectáreas", min_value=0.1, step=0.1)
 dilucion = st.number_input("🧪 Dilución (%)", min_value=0.0, step=0.1)

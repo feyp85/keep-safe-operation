@@ -56,7 +56,8 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     ubicacion = st.text_input("Ubicación")
     responsable = st.text_input("Responsable Técnico")
     
-    st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
+ st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
+
     m = folium.Map(location=[-2.1894, -79.8891], zoom_start=13)
     marker = folium.Marker(location=[-2.1894, -79.8891], draggable=True)
     marker.add_to(m)
@@ -64,6 +65,29 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
 
     lat = output['last_clicked']['lat'] if output and output.get('last_clicked') else -2.1894
     lon = output['last_clicked']['lng'] if output and output.get('last_clicked') else -79.8891
+    selected_location = st.session_state.get("selected_location", default_location)
+
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/streets-v12",
+        initial_view_state=pdk.ViewState(
+            latitude=selected_location["lat"],
+            longitude=selected_location["lon"],
+            zoom=12,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=[selected_location],
+                get_position='[lon, lat]',
+                get_color='[200, 30, 0, 160]',
+                get_radius=100,
+            )
+        ],
+    ))
+
+    lat = st.number_input("Latitud", value=selected_location["lat"], format="%.6f")
+    lon = st.number_input("Longitud", value=selected_location["lon"], format="%.6f")
 
     if st.button("Guardar Cliente"):
         if nuevo_ruc in lista_rucs:

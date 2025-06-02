@@ -14,7 +14,11 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
-sheet = client.open("KeepSafe_DB")
+try:
+    sheet = client.open("KeepSafe_DB")
+except gspread.exceptions.APIError:
+    st.error("⚠️ No se pudo acceder al documento 'KeepSafe_DB'. Verifica que el Service Account tenga permiso de editor en Google Sheets.")
+    st.stop()
 clientes_ws = sheet.worksheet("Clientes")
 operaciones_ws = sheet.worksheet("Operaciones")
 

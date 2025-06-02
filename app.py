@@ -55,8 +55,7 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     email = st.text_input("Email")
     ubicacion = st.text_input("Ubicación")
     responsable = st.text_input("Responsable Técnico")
-
-            st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
+    st.markdown("📍 Haz clic en el mapa para seleccionar ubicación")
 
         m = folium.Map(location=[-2.1894, -79.8891], zoom_start=13)
         marker = folium.Marker(location=[-2.1894, -79.8891], draggable=True)

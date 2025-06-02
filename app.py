@@ -6,6 +6,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
+import pydeck as pdk
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
@@ -54,8 +55,9 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     email = st.text_input("Email")
     ubicacion = st.text_input("Ubicación")
     responsable = st.text_input("Responsable Técnico")
+    
     st.markdown("📍 Selecciona la ubicación en el mapa")
-    import pydeck as pdk
+    
     default_location = {"lat": -2.1894, "lon": -79.8891}
     selected_location = st.session_state.get("selected_location", default_location)
 
@@ -81,13 +83,13 @@ with st.sidebar.expander("➕ Crear nuevo cliente"):
     lat = st.number_input("Latitud", value=selected_location["lat"], format="%.6f")
     lon = st.number_input("Longitud", value=selected_location["lon"], format="%.6f")
     
-  if st.button("Guardar Cliente"):
-    if nuevo_ruc in lista_rucs:
-        st.error("❌ Este RUC ya está registrado.")
-    else:
-        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        clientes_ws.append_row([len(clientes_data)+1, nuevo_ruc, nombre, telefono, email, ubicacion, responsable, fecha])
-        st.success("Cliente guardado")
+    if st.button("Guardar Cliente"):
+        if nuevo_ruc in lista_rucs:
+            st.error("❌ Este RUC ya está registrado.")
+        else:
+            fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            clientes_ws.append_row([len(clientes_data)+1, nuevo_ruc, nombre, telefono, email, ubicacion, responsable, lat, lon, fecha])
+            st.success("Cliente guardado")
 
 cultivo = st.selectbox("🌿 Cultivo", list(cultivos_data.keys()))
 hectareas = st.number_input("📐 Hectáreas", min_value=0.1, step=0.1)

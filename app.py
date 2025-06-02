@@ -91,6 +91,38 @@ cultivo = st.selectbox("🌿 Cultivo", list(cultivos_data.keys()))
 hectareas = st.number_input("📐 Hectáreas", min_value=0.1, step=0.1)
 dilucion = st.number_input("🧪 Dilución (%)", min_value=0.0, step=0.1)
 
+# Descripción detallada de la fórmula o mezcla
+descripcion_formula = st.text_area(
+    "🧪 Descripción técnica de la mezcla a aplicar",
+    placeholder="Ejemplo: Glifosato 480 SL a 2 L/ha, diluido en 100 L de agua. Preparado el 01/06/2025. Lote #12345."
+)
+
+# Campos adicionales sugeridos
+etapa_cultivo = st.selectbox(
+    "🌱 Etapa del cultivo",
+    ["Seleccionar...", "Siembra", "Vegetativo", "Floración", "Fructificación", "Madurez", "Cosecha"]
+)
+
+tipo_tratamiento = st.selectbox(
+    "🧫 Tipo de tratamiento",
+    ["Seleccionar...", "Herbicida", "Insecticida", "Fungicida", "Fertilizante", "Biopesticida", "Otro"]
+)
+
+condiciones_terreno = st.text_area(
+    "⛰️ Condiciones del terreno",
+    placeholder="Ej: Terreno plano, con pendiente leve hacia el sur. Obstáculos: árboles dispersos, cables eléctricos en el borde este."
+)
+
+condiciones_ambientales = st.text_area(
+    "🌤️ Condiciones ambientales esperadas",
+    placeholder="Ej: Aplicación entre 06h00 y 08h00. Viento <10 km/h. Temperatura 26°C aprox."
+)
+
+seguridad_observaciones = st.text_area(
+    "⚠️ Seguridad / Observaciones especiales",
+    placeholder="Ej: Tiempo de reentrada sugerido 12 horas. Cultivos sensibles vecinos al norte."
+)
+
 if cultivo and hectareas:
     datos = cultivos_data[cultivo]
     tasa = datos["tasa_aplicacion"]
@@ -117,6 +149,8 @@ if cultivo and hectareas:
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         operaciones_ws.append_row([
             len(operaciones_ws.get_all_values()), ruc_codigo, cultivo, hectareas, dilucion,
+            descripcion_formula, etapa_cultivo, tipo_tratamiento, condiciones_terreno,
+            condiciones_ambientales, seguridad_observaciones,
             total_sol, puro, int(vuelos), round(tiempo, 2), velocidad, altura, faja, gota, tasa_aplicacion, now
         ])
         st.success("✅ Operación guardada")

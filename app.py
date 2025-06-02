@@ -6,7 +6,8 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
-import pydeck as pdk
+from streamlit_folium import st_folium
+import folium
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])

@@ -34,7 +34,11 @@ cultivos_data = {
 
 # Clientes
 st.sidebar.subheader("📇 Gestión de Clientes")
-clientes_data = clientes_ws.get_all_records()
+try:
+    clientes_data = clientes_ws.get_all_records()
+except gspread.exceptions.APIError as e:
+    st.error("⚠️ No se pudo acceder a la hoja de clientes. Verifica conexión, permisos o vuelve a intentar en unos minutos.")
+    st.stop()
 lista_rucs = [c["RUC"] for c in clientes_data]
 cliente_nombres = [f"{c['RUC']} - {c['Nombre']}" for c in clientes_data]
 ruc_input = st.sidebar.selectbox("🔍 Buscar cliente por RUC", options=cliente_nombres)

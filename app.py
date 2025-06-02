@@ -103,6 +103,20 @@ etapa_cultivo = st.selectbox(
     ["Seleccionar...", "Siembra", "Vegetativo", "Floración", "Fructificación", "Madurez", "Cosecha"]
 )
 
+# Mostrar recomendación según etapa
+recomendaciones_etapa = {
+    "Siembra": "Evitar aplicaciones con herbicidas residuales cerca de la germinación.",
+    "Vegetativo": "Etapa óptima para fertilización foliar y control de plagas tempranas.",
+    "Floración": "Evitar insecticidas tóxicos para polinizadores. Aplicar temprano o tarde.",
+    "Fructificación": "Priorizar fungicidas preventivos. Mantener cobertura uniforme.",
+    "Madurez": "Evitar aplicaciones cercanas a cosecha sin observar el periodo de carencia.",
+    "Cosecha": "No se recomienda aplicar productos fitosanitarios en esta etapa."
+}
+
+if etapa_cultivo != "Seleccionar...":
+    st.info(f"🛈 Recomendación para esta etapa: {recomendaciones_etapa.get(etapa_cultivo, '')}")
+
+
 tipo_tratamiento = st.selectbox(
     "🧫 Tipo de tratamiento",
     ["Seleccionar...", "Herbicida", "Insecticida", "Fungicida", "Fertilizante", "Biopesticida", "Otro"]
@@ -118,10 +132,24 @@ condiciones_ambientales = st.text_area(
     placeholder="Ej: Aplicación entre 06h00 y 08h00. Viento <10 km/h. Temperatura 26°C aprox."
 )
 
+# Recomendación automática según tipo de tratamiento
+recomendaciones_seguridad = {
+    "Insecticida": "Tiempo de reentrada recomendado: 24 horas. Usar señalización visible.",
+    "Herbicida": "Tiempo de reentrada recomendado: 12 horas. Evitar contacto directo.",
+    "Fertilizante": "Tiempo de reentrada recomendado: 6 horas. Aplicar en horas frescas del día.",
+    "Biopesticida": "Tiempo de reentrada recomendado: 4 horas. Bajo riesgo para operarios.",
+    "Fungicida": "Tiempo de reentrada recomendado: 12 horas. Asegurar buena ventilación del cultivo.",
+    "Otro": "Verificar ficha técnica del producto aplicado."
+}
+
+texto_sugerido = recomendaciones_seguridad.get(tipo_tratamiento, "")
+
 seguridad_observaciones = st.text_area(
     "⚠️ Seguridad / Observaciones especiales",
-    placeholder="Ej: Tiempo de reentrada sugerido 12 horas. Cultivos sensibles vecinos al norte."
+    value=texto_sugerido,
+    placeholder="Observaciones específicas según el producto o condiciones del sitio."
 )
+
 
 if cultivo and hectareas:
     datos = cultivos_data[cultivo]
